@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <title>Lietotāja panelis</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <h1>Pieejamās smaržas</h1>
+    <div class="perfume-grid">
+        {% for perfume in perfumes %}
+        <div class="perfume-card">
+            <h3>{{ perfume[1] }}</h3>
+            <p>Tilpums: {{ perfume[2] }}ml</p>
+            <p>Cena: {{ "%.2f"|format(perfume[3]) }}€</p>
+            <form method="POST" action="/add_to_cart">
+                <input type="hidden" name="perfume_id" value="{{ perfume[0] }}">
+                <input type="hidden" name="perfume_name" value="{{ perfume[1] }}">
+                <input type="hidden" name="price" value="{{ perfume[3] }}">
+                <input type="number" name="quantity" min="1" value="1">
+                <button type="submit" class="btn">Pievienot grozam</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="action-buttons">
+        <a href="/cart" class="btn">Apskatīt grozu</a>
+        <a href="/" class="btn logout-btn">Izrakstīties</a>
+    </div>
+    <script src="/static/js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+    <meta charset="UTF-8">
+    <title>Jūsu grozs</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .cart-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .remove-btn {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .order-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jūsu pasūtījumu grozs</h1>
+    <div class="cart-items" id="cart-items">
+        {% if orders %}
+            {% for order in orders %}
+            <div class="cart-item" data-product="{{ order[0] }}">
+                <h3>{{ order[0] }}</h3>
+                <p>Daudzums: {{ order[1] }}</p>
+                <p>Cena: {{ "%.2f"|format(order[2]) }}€</p>
+                <button class="remove-btn">Noņemt no groza</button>
+            </div>
+            {% endfor %}
+            <div class="cart-total">
+                <h3>Kopējā summa: {{ "%.2f"|format(total) }}€</h3>
+            </div>
+            <button class="order-btn" id="complete-order">Pasūtīt</button>
+        {% else %}
+            <p>Jūsu grozs ir tukšs</p>
+        {% endif %}
+    </div>
+    <div class="action-buttons">
+        <a href="/dashboard/{{ user_id }}" class="btn">Atpakaļ uz veikalu</a>
+        <a href="/" class="btn logout-btn">Izrakstīties</a>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
