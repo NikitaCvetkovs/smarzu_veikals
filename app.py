@@ -6,23 +6,23 @@ app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 DATABASE = 'shop.db'
 
-def create_database():
+def create_database(): #izveido datubāzi
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
     
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
+    c.execute('''CREATE TABLE IF NOT EXISTS users ( #izveido lietotāju tabulu
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL)''')
     
-    c.execute('''CREATE TABLE IF NOT EXISTS perfumes (
+    c.execute('''CREATE TABLE IF NOT EXISTS perfumes ( #izveido smaržu tabulu
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 volume INTEGER NOT NULL,
                 price REAL NOT NULL)''')
     
-    c.execute('''CREATE TABLE IF NOT EXISTS orders (
+    c.execute('''CREATE TABLE IF NOT EXISTS orders ( #izveido pasūtījumu tabulu
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
                 perfume_name TEXT NOT NULL,
@@ -34,11 +34,11 @@ def create_database():
     conn.commit()
     conn.close()
 
-@app.route('/')
+@app.route('/') #maršruts uz galveno lapu
 def index():
     return render_template('index.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register', methods=['GET', 'POST']) #maršruts uz reģistrācijas lapu ar post un get metodēm
 def register():
     if request.method == 'POST':
         username = request.form['username']
@@ -47,7 +47,7 @@ def register():
         
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
-        c.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)",
+        c.execute("INSERT INTO users (username, email, password) VALUES (?, ?, ?)", #pievieno datus tabulai
                  (username, email, password))
         conn.commit()
         conn.close()
@@ -55,7 +55,7 @@ def register():
     
     return render_template('register.html')
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST']) #maršruts uz autentifikācijas lapu
 def login():
     if request.method == 'POST':
         email = request.form['email']
@@ -63,7 +63,7 @@ def login():
         
         conn = sqlite3.connect(DATABASE)
         c = conn.cursor()
-        c.execute("SELECT id FROM users WHERE email = ? AND password = ?", (email, password))
+        c.execute("SELECT id FROM users WHERE email = ? AND password = ?", (email, password)) #paņem datus no lietotāju tabulas
         user = c.fetchone()
         conn.close()
         
@@ -74,16 +74,16 @@ def login():
     
     return render_template('login.html')
 
-@app.route('/dashboard/<int:user_id>')
+@app.route('/dashboard/<int:user_id>') #maršruts uz smaržu lapu
 def dashboard(user_id):
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    c.execute("SELECT * FROM perfumes")
+    c.execute("SELECT * FROM perfumes") 
     perfumes = c.fetchall()
     conn.close()
     return render_template('dashboard.html', perfumes=perfumes, user_id=user_id)
 
-@app.route('/add_to_cart', methods=['POST'])
+@app.route('/add_to_cart', methods=['POST']) #funkcija "Pievienot grozam"
 def add_to_cart():
     user_id = session.get('user_id')
     if not user_id:
@@ -96,14 +96,14 @@ def add_to_cart():
     
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    c.execute("INSERT INTO orders (user_id, perfume_name, quantity, total_price, order_date) VALUES (?, ?, ?, ?, ?)",
+    c.execute("INSERT INTO orders (user_id, perfume_name, quantity, total_price, order_date) VALUES (?, ?, ?, ?, ?)", #pievieno informāciju pasūtījumu tabulā
              (user_id, perfume_name, quantity, price*quantity, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
     conn.commit()
     conn.close()
     
     return redirect(url_for('cart'))
 
-@app.route('/cart')
+@app.route('/cart') #maršruts uz grozu
 def cart():
     user_id = session.get('user_id')
     if not user_id:
@@ -111,7 +111,7 @@ def cart():
     
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    c.execute("SELECT perfume_name, quantity, total_price FROM orders WHERE user_id = ?", (user_id,))
+    c.execute("SELECT perfume_name, quantity, total_price FROM orders WHERE user_id = ?", (user_id,)) #paņem informāciju no pasūtījumu tabulas
     orders = c.fetchall()
     
     total = sum(order[2] for order in orders)
@@ -119,7 +119,7 @@ def cart():
     
     return render_template('cart.html', orders=orders, total=total, user_id=user_id)
 
-@app.route('/remove_from_cart', methods=['POST'])
+@app.route('/remove_from_cart', methods=['POST']) #funkcija noņemšanai no groza
 def remove_from_cart():
     if 'user_id' not in session:
         return redirect(url_for('login'))
@@ -128,14 +128,14 @@ def remove_from_cart():
     
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    c.execute("DELETE FROM orders WHERE user_id = ? AND perfume_name = ?", 
+    c.execute("DELETE FROM orders WHERE user_id = ? AND perfume_name = ?", #izdzēš informāciju par pasūtījumu no pasūtījuma tabulas 
              (session['user_id'], perfume_name))
     conn.commit()
     conn.close()
     
     return redirect(url_for('cart'))
 
-@app.route('/complete_order', methods=['POST'])
+@app.route('/complete_order', methods=['POST'])  #funkcija pasūtījuma pabeigšanai
 def complete_order():
     if 'user_id' not in session:
         return redirect(url_for('login'))
@@ -144,7 +144,7 @@ def complete_order():
     
     conn = sqlite3.connect(DATABASE)
     c = conn.cursor()
-    c.execute("SELECT * FROM orders WHERE user_id = ?", (user_id,))
+    c.execute("SELECT * FROM orders WHERE user_id = ?", (user_id,)) #paņem informāciju no pasūtījuma tabulas, lai pievienot teksta failam
     orders = c.fetchall()
     
     with open('order_history.txt', 'a', encoding='utf-8') as f:
@@ -153,7 +153,7 @@ def complete_order():
                    f"User:{user_id}, Product:{order[2]}, "
                    f"Qty:{order[3]}, Price:{order[4]}€\n")
     
-    c.execute("DELETE FROM orders WHERE user_id = ?", (user_id,))
+    c.execute("DELETE FROM orders WHERE user_id = ?", (user_id,)) #izdzēš no pasūtījuma tabulas
     conn.commit()
     conn.close()
     
