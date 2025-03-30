@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    //noņemt preci no groza
     document.addEventListener('click', function(e) {
         if(e.target.classList.contains('remove-btn')) {
             const productName = e.target.closest('.cart-item').getAttribute('data-product');
@@ -20,7 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    //pabeigt pasūtījumu
     const completeOrderBtn = document.getElementById('complete-order');
     if(completeOrderBtn) {
         completeOrderBtn.addEventListener('click', function() {
@@ -34,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    //validācija pievienošanai grozam
     const addToCartForms = document.querySelectorAll('form[action="/add_to_cart"]');
     addToCartForms.forEach(form => {
         form.addEventListener('submit', function(e) {
